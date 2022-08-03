@@ -1,0 +1,49 @@
+name: Test changed apps
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changed-apps:
+    name: Derive changed apps
+    runs-on: ubuntu-20.04
+    outputs:
+      apps: "${{ steps.apps.outputs.CHANGED-APPS }}"
+      apps-count: "${{ steps.apps.outputs.CHANGED-APPS-COUNT }}"
+
+    steps:
+      - name: Get changed apps
+        id: apps
+        run: |
+          changed_apps=$(echo 'cronjobs api-invoker' | tr -s ' ' '\n')
+          echo '=== Services to test: ==='
+          echo "$changed_apps"
+          echo '========================='
+          echo ::set-output name=CHANGED-APPS-COUNT::$(echo "$changed_apps" | sed '/^[[:space:]]*$/d' | wc -l)
+          echo ::set-output name=CHANGED-APPS::$(jq -ncR '[inputs]' <<< "$changed_apps")
+
+  test-changed-apps:
+    needs: [changed-apps]
+    name: Test scala apps
+    if: ${{ needs.changed-apps.outputs.apps-count != '0' }}
+    uses: ./.github/workflows/test-apps-parallel.yaml
+    with:
+      apps: ${{ needs.changed-apps.outputs.apps }}
+    secrets: inherit
+
+  scalacheck:
+    name: Scalacheck
+    needs: [test-changed-apps]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Report result
+        run: |
+          if [ ${{ needs.test-changed-apps.outputs.result }} != 'success' ]; then
+            exit 1
+          fi
+
