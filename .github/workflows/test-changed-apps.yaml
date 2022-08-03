@@ -1,7 +1,6 @@
 name: Test changed apps
 
 on:
-  push:
   pull_request:
 
 concurrency:
@@ -21,6 +20,7 @@ jobs:
         id: apps
         run: |
           changed_apps=$(echo 'cronjobs api-invoker' | tr -s ' ' '\n')
+          changed_apps=''
           echo '=== Services to test: ==='
           echo "$changed_apps"
           echo '========================='
@@ -38,12 +38,13 @@ jobs:
 
   scalacheck:
     name: Scalacheck
-    needs: [test-changed-apps]
-    runs-on: ubuntu-20.04
+    if: needs.test-changed-apps.result != 'skipped'
+    needs: test-changed-apps
+    runs-on: ubuntu-latest
     steps:
-      - name: Report result
-        run: |
-          if [ ${{ needs.test-changed-apps.outputs.result }} != 'success' ]; then
-            exit 1
-          fi
+      - name: Debug
+        run: echo ${{ needs.test-changed-apps.result }}
+      - name: All successful
+        if: ${{ needs.test-changed-apps.result == 'failure' }}
+        run: exit 1
 
