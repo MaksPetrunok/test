@@ -1,0 +1,29 @@
+name: Build apps
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      scala_branch:
+        required: true
+
+jobs:
+  changed-apps:
+    name: Derive changed apps
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch custom branch
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.scala_branch }}
+
+      - name: Build commit
+        id: build-commit
+        run: |
+          echo "GITHUB_SHA: $GITHUB_SHA"
+          echo "GITHUB_REF: $GITHUB_REF"
+          echo "git rev-parse $(git rev-parse --short=7 HEAD)"
