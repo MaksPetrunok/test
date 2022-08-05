@@ -3,7 +3,7 @@ name: Build apps
 on:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
     inputs:
       scala_branch:
