@@ -19,15 +19,14 @@ jobs:
 
     steps:
       - name: Fetch custom branch
-        if: ${{ github.event_name == 'workflow_dispatch' }}
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.inputs.scala_branch }}
+          fetch-depth: 2
 
       - name: Changes
         run: |
           echo ${GITHUB_REF}
-          git diff --name-only origin/master HEAD
+          git diff --name-only HEAD~1
           echo -------------------------------
           git diff --name-only origin/master HEAD~1
 
