@@ -26,7 +26,7 @@ jobs:
 
       - name: Changes
         run: |
-          echo ${{ GITHUB_REF }}
+          echo ${GITHUB_REF}
           git diff --name-only origin/master HEAD
           echo -------------------------------
           git diff --name-only origin/master HEAD~1
