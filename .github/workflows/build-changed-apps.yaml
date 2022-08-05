@@ -24,6 +24,13 @@ jobs:
         with:
           ref: ${{ github.event.inputs.scala_branch }}
 
+      - name: Changes
+        run: |
+          echo ${{ GITHUB_REF }}
+          git diff --name-only origin/master HEAD
+          echo -------------------------------
+          git diff --name-only origin/master HEAD~1
+
       - name: Build commit
         id: build-commit
         run: |
