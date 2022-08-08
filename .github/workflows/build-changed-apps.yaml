@@ -6,8 +6,15 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      scala_branch:
+      release_type:
+        type: choice
         required: true
+        default: bar
+        description: Make a choice
+        options:
+          - foo
+          - bar
+          - baz
 
 jobs:
   changed-apps:
@@ -25,6 +32,10 @@ jobs:
 
       - name: Changes
         run: |
+          echo "Release: ${{ inputs.release_type }}"
+          echo "git rev-parse HEAD: $(git rev-parse HEAD)"
+          echo "GITHUB_SHA:         $GITHUB_SHA"
+          echo
           echo ${GITHUB_REF}
           git diff --name-only HEAD~1
           echo -------------------------------
