@@ -32,6 +32,7 @@ jobs:
 
       - name: Changes
         run: |
+          echo
           echo "Release: ${{ inputs.release_type }}"
           echo "git rev-parse HEAD: $(git rev-parse HEAD)"
           echo "GITHUB_SHA:         $GITHUB_SHA"
