@@ -1,0 +1,36 @@
+name: Tets caching a
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache dir a
+        id: get-cache-a
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-a
+        with:
+          path: |
+            ~/a
+            ~/b
+          key: cache-dir-x
+          restore-keys: |
+            cache-dir-
+            cache-
+
+      - run: echo ${{ steps.get-cache-a.outputs.cache-hit }}
+
+      - if: steps.get-cache-a.outputs.cache-hit == 'true'
+        name: Cache hit
+        run: |
+          echo ls a
+          [ -d ~/a ] && ls -lh ~/a || echo no dir a
+          echo ls b
+          [ -d ~/b ] && ls -lh ~/b || echo no dir b
+
+      - name: Create content
+        if: steps.get-cache-a.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/a
+          echo 'a content' > ~/a/file.txt
+          ls -lh ~/a
