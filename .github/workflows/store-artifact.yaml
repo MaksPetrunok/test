@@ -1,0 +1,71 @@
+name: Store artifact
+on: push
+jobs:
+  upload-a:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir -p ./a/target
+          echo hello a > ./a/target/world.txt
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: target-artifact
+          path: ./*/target
+          retention-days: 1
+  upload-a-empty:
+    needs: upload-a
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir -p ./a/target
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: target-artifact
+          path: ./*/target
+          retention-days: 1
+  upload-b:
+    needs: upload-a
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir -p ./b/target
+          echo hello b > ./b/target/world.txt
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: target-artifact
+          path: ./*/target
+          retention-days: 1
+
+
+  download:
+    needs: [ upload-a, upload-b, upload-a-empty ]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir -p ./b
+          echo yo > ./b/src.txt
+      - uses: actions/download-artifact@v3
+        with:
+          name: target-artifact
+
+      - name: Display structure of downloaded files
+        run: |
+          ls -lR
+          echo show a
+          [ -f ./a/target/world.txt ] && cat ./a/target/world.txt || echo "!!! ./a/target/world.txt not found"
+          echo show b
+          [ -f ./b/target/world.txt ] && cat ./b/target/world.txt || echo "!!! ./b/target/world.txt not found"
+          [ -f ./b/src.txt ] && cat ./b/src.txt || echo "!!! ./b/src.txt not found"
+  download-missing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        continue-on-error: true
+        with:
+          name: target-artifact
+      - name: Display structure of downloaded files
+        run: |
+          ls -lR
