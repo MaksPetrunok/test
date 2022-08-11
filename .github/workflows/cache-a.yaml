@@ -1,6 +1,16 @@
 name: Tets caching a
-on: push
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 jobs:
+  show-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show branch
+        run: |
+          echo Branch: ${GITHUB_REF#refs/heads/}
   job-a:
     runs-on: ubuntu-latest
     steps:
