@@ -1,7 +1,7 @@
 name: Tets caching a
 on: push
 jobs:
-  build:
+  job-a:
     runs-on: ubuntu-latest
     steps:
       - name: Cache dir a
@@ -13,15 +13,11 @@ jobs:
           path: |
             ~/a
             ~/b
-          key: cache-dir-x
+          key: x-cache-a
           restore-keys: |
-            cache-dir-
-            cache-
+            x-cache-
 
-      - run: echo ${{ steps.get-cache-a.outputs.cache-hit }}
-
-      - if: steps.get-cache-a.outputs.cache-hit == 'true'
-        name: Cache hit
+      - name: Get data
         run: |
           echo ls a
           [ -d ~/a ] && ls -lh ~/a || echo no dir a
@@ -29,8 +25,61 @@ jobs:
           [ -d ~/b ] && ls -lh ~/b || echo no dir b
 
       - name: Create content
-        if: steps.get-cache-a.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/a
           echo 'a content' > ~/a/file.txt
           ls -lh ~/a
+  job-b:
+    runs-on: ubuntu-latest
+    needs: job-a
+    steps:
+      - name: Cache dir b
+        id: get-cache-b
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-b
+        with:
+          path: |
+            ~/a
+            ~/b
+          key: x-cache-b
+          restore-keys: |
+            x-cache-
+
+      - name: Get data
+        run: |
+          echo ls a
+          [ -d ~/a ] && ls -lh ~/a || echo no dir a
+          echo ls b
+          [ -d ~/b ] && ls -lh ~/b || echo no dir b
+
+      - name: Create content
+        run: |
+          mkdir -p ~/b
+          echo 'b content' > ~/b/file.txt
+          ls -lh ~/b
+  job-both:
+    needs:
+      - job-a
+      - job-b
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache dir a
+        id: get-cache-a
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-a
+        with:
+          path: |
+            ~/a
+            ~/b
+          key: x-cache-a
+          restore-keys: |
+            x-cache-
+
+      - name: Get data
+        run: |
+          echo ls a
+          [ -d ~/a ] && ls -lh ~/a || echo no dir a
+          echo ls b
+          [ -d ~/b ] && ls -lh ~/b || echo no dir b
