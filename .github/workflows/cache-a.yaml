@@ -13,7 +13,7 @@ jobs:
           path: |
             ~/a
             ~/b
-          key: x-cache-a
+          key: x-cache-${{ GITHUB_REF#refs/heads/ }}
           restore-keys: |
             x-cache-
 
