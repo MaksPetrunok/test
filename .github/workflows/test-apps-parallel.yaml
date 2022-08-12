@@ -22,6 +22,10 @@ jobs:
       - name: Run tests
         run: |
           echo "Testing ${{ matrix.app }}"
+          if [ ${{ matrix.app }} == 'cronjobs' ]; then
+            echo Failing...
+            exit 1
+          fi
 
 
 
