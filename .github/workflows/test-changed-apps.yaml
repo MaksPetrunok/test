@@ -21,6 +21,7 @@ jobs:
         id: apps
         run: |
           changed_apps=$(echo 'cronjobs api-invoker' | tr -s ' ' '\n')
+          changed_apps=''
           echo '=== Services to test: ==='
           echo "$changed_apps"
           echo '========================='
@@ -36,14 +37,25 @@ jobs:
       apps: ${{ needs.changed-apps.outputs.apps }}
     secrets: inherit
 
+  scalacheck-debug:
+    name: Debug
+    needs: [ test-changed-apps ]
+    runs-on: ubuntu-20.04
+    if: always()
+    steps:
+      - name: Report result
+        run: |
+          echo ${{ needs.test-changed-apps.outputs.result }}
+
   scalacheck:
     name: Scalacheck
+    if: always() && needs.test-changed-apps.result != 'skipped'
     needs: [test-changed-apps]
     runs-on: ubuntu-20.04
     steps:
       - name: Report result
         run: |
-          if [ ${{ needs.test-changed-apps.outputs.result }} != 'success' ]; then
+          if [ ${{ needs.test-changed-apps.outputs.result != 'success' }} ]; then
             exit 1
           fi
 

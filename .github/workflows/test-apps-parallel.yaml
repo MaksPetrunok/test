@@ -25,6 +25,8 @@ jobs:
           if [ ${{ matrix.app }} == 'cronjobs' ]; then
             echo Failing...
             exit 1
+          else
+            # sleep 10
           fi
 
 
