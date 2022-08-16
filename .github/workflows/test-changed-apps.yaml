@@ -53,8 +53,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Report result
-        run: |
-          if [ ${{ needs.test-changed-apps.outputs.result != 'success' }} ]; then
-            exit 1
-          fi
+        if: ${{ needs.test-changed-apps.result != 'success' }}
+        run: exit 1
+          # if [ ${{ needs.test-changed-apps.outputs.result != 'success' }} ]; then
+          #   exit 1
+          # fi
 
